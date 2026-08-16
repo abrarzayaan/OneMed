@@ -1,0 +1,32 @@
+{
+  "name": "OneMed — Healthcare & Online Pharmacy",
+  "short_name": "OneMed",
+  "description": "Order medicines, track live order fulfillment, and access expert pharmacy services instantly.",
+  "theme_color": "#0f0f13",
+  "background_color": "#0f0f13",
+  "display": "standalone",
+  "orientation": "portrait",
+  "start_url": "/",
+  "scope": "/",
+  "categories": ["shopping", "medical", "health"],
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
