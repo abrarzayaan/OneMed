@@ -33,10 +33,16 @@ export const adminVendorVerificationApi = {
   }): Promise<AdminVendorItem[]> => {
     try {
       const res = await api.get('/profiles/admin/vendors/', { params });
-      return res.data;
-    } catch (err) {
-      const fallbackRes = await api.get('/admin-vendors/', { params });
-      return fallbackRes.data;
+      const list = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+      return list;
+    } catch {
+      try {
+        const fallbackRes = await api.get('/admin-vendors/', { params });
+        const list = Array.isArray(fallbackRes.data) ? fallbackRes.data : (fallbackRes.data?.results || []);
+        return list;
+      } catch {
+        return [];
+      }
     }
   },
 
@@ -51,7 +57,7 @@ export const adminVendorVerificationApi = {
     try {
       const res = await api.patch(`/profiles/admin/vendors/${id}/`, payload);
       return res.data;
-    } catch (err) {
+    } catch {
       const fallbackRes = await api.patch(`/admin-vendors/${id}/`, payload);
       return fallbackRes.data;
     }

@@ -2,37 +2,73 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework import status
+# pyrefly: ignore [missing-import]
 from apps.profiles.models import RiderProfile
+# pyrefly: ignore [missing-import]
+from apps.orders.models import Order
+# pyrefly: ignore [missing-import]
+from apps.orders.choices import OrderStatus
+
 
 class AdminRiderFleetListCreateView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        riders = RiderProfile.objects.all()
+        riders = RiderProfile.objects.select_related('user').all()
         data = []
-        for idx, r in enumerate(riders):
+        for r in riders:
+            # 1. Total deliveries completed
+            completed_count = Order.objects.filter(
+                assigned_rider=r,
+                order_status=OrderStatus.DELIVERED
+            ).count()
+
+            # 2. Active order in transit
+            active_order = Order.objects.filter(
+                assigned_rider=r,
+                order_status__in=[OrderStatus.PROCESSING, OrderStatus.PACKED, OrderStatus.OUT_FOR_DELIVERY]
+            ).first()
+
+            # 3. Status mapping
+            if active_order:
+                rider_status = "IN_TRANSIT"
+            elif r.availability_status == "online":
+                rider_status = "ON_DUTY"
+            elif r.availability_status == "busy":
+                rider_status = "IN_TRANSIT"
+            else:
+                rider_status = "OFF_DUTY"
+
+            name = f"{r.user.first_name} {r.user.last_name}".strip() if r.user else ""
+            if not name and r.user:
+                name = r.user.username
+            if not name:
+                name = f"Rider #{r.id}"
+
+            phone = r.user.phone_number if (r.user and r.user.phone_number) else "N/A"
+
             data.append({
                 "id": r.id,
-                "rider_name": r.user.username if r.user else f"Rider #{r.id}",
-                "phone_number": r.user.phone_number if r.user else "01711223344",
-                "vehicle_type": "Motorcycle" if r.vehicle_type == "bike" else "Scooter",
-                "assigned_zone": "Dhanmondi & Gulshan Hub",
-                "status": "IN_TRANSIT" if r.availability_status == "online" else "OFF_DUTY",
-                "current_active_order_id": f"ORD-98{idx+1:02d}" if r.availability_status == "online" else None,
-                "current_location": "Dhanmondi Rd 27 Hub",
+                "rider_name": name,
+                "phone_number": phone,
+                "vehicle_type": "Motorcycle" if r.vehicle_type == "bike" else ("Bicycle" if r.vehicle_type == "cycle" else "Scooter"),
+                "assigned_zone": "Central Hub",
+                "status": rider_status,
+                "current_active_order_id": active_order.order_number if active_order else None,
+                "current_location": "Central Dispatch Point",
                 "lat": float(r.current_latitude or 23.7548),
                 "lng": float(r.current_longitude or 90.3765),
-                "total_deliveries_completed": (r.id * 50) + 120,
+                "total_deliveries_completed": completed_count,
                 "avg_delivery_time_mins": 25,
-                "rating": 4.8,
+                "rating": 4.9,
                 "joined_date": r.created_at.isoformat() if r.created_at else "",
             })
-        return Response(data)
+        return Response(data, status=status.HTTP_200_OK)
 
     def post(self, request):
         data = request.data
         return Response({
-            "id": 99,
+            "id": 1,
             "rider_name": data.get("rider_name", "New Rider"),
             "phone_number": data.get("phone_number", "01700000000"),
             "vehicle_type": data.get("vehicle_type", "Motorcycle"),
@@ -55,7 +91,7 @@ class AdminRiderFleetDetailView(APIView):
             rider.availability_status = "online" if st in ["IN_TRANSIT", "ON_DUTY"] else "offline"
             rider.save()
 
-        return Response({"id": rider.id, "availability_status": rider.availability_status})
+        return Response({"id": rider.id, "availability_status": rider.availability_status}, status=status.HTTP_200_OK)
 
     def delete(self, request, pk):
         try:
