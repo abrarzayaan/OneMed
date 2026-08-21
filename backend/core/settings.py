@@ -23,8 +23,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-swis&3gg_6c6!sc%!)pw8g&kwxu34_sd=b-&zre^@mup_7%4bz'
 
 import os
-# pyrefly: ignore [missing-import]
-import dj_database_url # Import korun upore
+from dotenv import load_dotenv
+import dj_database_url
+
+# Load environment variables from .env file
+load_dotenv(BASE_DIR / '.env')
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
