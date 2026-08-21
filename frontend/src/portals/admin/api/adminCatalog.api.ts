@@ -677,14 +677,10 @@ export const adminCatalogApi = {
   },
 
   uploadVariantImage: async (formData: FormData): Promise<ProductImageItem> => {
-    try {
-      const res = await api.post('/products/images/', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      return res.data;
-    } catch {
-      return { id: Date.now(), variant: 1, image_url: '', is_primary: true, status: 'active' };
-    }
+    const res = await api.post('/products/images/', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data;
   },
 
   updateImage: async (id: number, payload: Partial<{ is_primary: boolean; sort_order: number; status: string }>): Promise<ProductImageItem> => {

@@ -1,13 +1,48 @@
-# pyrefly: ignore [missing-import]
 from rest_framework import serializers
 from apps.products.models import ProductVariant, ProductImage
 
 
+class FlexibleImageField(serializers.Field):
+    """
+    Handles both uploaded image files and direct image URL strings.
+    """
+    def to_representation(self, value):
+        if not value:
+            return ""
+        if hasattr(value, 'url'):
+            return value.url
+        return str(value)
+
+    def to_internal_value(self, data):
+        if not data:
+            raise serializers.ValidationError("This field is required.")
+        if isinstance(data, str) and (data.startswith('http://') or data.startswith('https://')):
+            return data
+        # Validate uploaded file as a valid image
+        img_field = serializers.ImageField()
+        return img_field.to_internal_value(data)
+
+
 class ProductImageSerializer(serializers.ModelSerializer):
+    image_url = FlexibleImageField()
+    variant_name = serializers.CharField(source='variant.variant_name', read_only=True)
+    product_name = serializers.CharField(source='variant.product.name', read_only=True)
+
     class Meta:
         model = ProductImage
-        fields = ['id', 'variant', 'image_url', 'is_primary', 'sort_order', 'status', 'created_at']
+        fields = ['id', 'variant', 'variant_name', 'product_name', 'image_url', 'is_primary', 'sort_order', 'status', 'created_at']
         read_only_fields = ['id', 'created_at']
+
+    def to_internal_value(self, data):
+        if hasattr(data, 'copy'):
+            data = data.copy()
+        elif isinstance(data, dict):
+            data = dict(data)
+            
+        if 'image' in data and 'image_url' not in data:
+            data['image_url'] = data['image']
+
+        return super().to_internal_value(data)
 
 
 class ProductVariantSerializer(serializers.ModelSerializer):

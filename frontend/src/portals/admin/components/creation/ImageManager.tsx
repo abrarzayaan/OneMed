@@ -81,7 +81,7 @@ export const ImageManager: React.FC = () => {
       formData.append('is_primary', String(isPrimary));
 
       if (selectedFile) {
-        formData.append('image', selectedFile);
+        formData.append('image_url', selectedFile);
       } else {
         formData.append('image_url', imageUrlInput.trim());
       }
@@ -90,8 +90,9 @@ export const ImageManager: React.FC = () => {
       toast.success('Image uploaded successfully to database!');
       setIsModalOpen(false);
       fetchInitialData();
-    } catch {
-      toast.error('Failed to upload image via API');
+    } catch (err: any) {
+      const msg = err?.response?.data?.image_url?.[0] || err?.response?.data?.detail || err?.message || 'Failed to upload image via API';
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }
