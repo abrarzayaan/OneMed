@@ -1,7 +1,11 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+# pyrefly: ignore [missing-import]
 from apps.orders.API.admin.views import AdminOrderViewSet, AdminVendorListView, AdminRiderListView
-from apps.orders.API.admin.analytics_views import AdminAnalyticsOverviewView
+from apps.orders.API.admin.analytics_views import (
+    AdminAnalyticsOverviewView,
+    AdminAnalyticsChartView,
+)
 from apps.orders.API.admin.explorer_views import AdminModelExplorerMetadataView, AdminModelExplorerDataView
 from apps.orders.API.admin.rx_views import AdminPrescriptionQueueView, AdminPrescriptionVerifyView
 from apps.orders.API.admin.settlement_views import (
@@ -20,8 +24,9 @@ urlpatterns = [
     path("vendors/", AdminVendorListView.as_view(), name="admin-vendors"),
     path("riders/", AdminRiderListView.as_view(), name="admin-riders"),
 
-    # Analytics Overview (Section 04)
+    # Analytics Overview & Charts (Section 04)
     path("analytics/overview/", AdminAnalyticsOverviewView.as_view(), name="admin-analytics-overview"),
+    path("analytics/chart/", AdminAnalyticsChartView.as_view(), name="admin-analytics-chart"),
 
     # Generic Model Explorer (Section 07)
     path("explorer/models/", AdminModelExplorerMetadataView.as_view(), name="admin-explorer-metadata"),

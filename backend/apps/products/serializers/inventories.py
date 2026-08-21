@@ -1,20 +1,25 @@
 # pyrefly: ignore [missing-import]
 from rest_framework import serializers
+# pyrefly: ignore [missing-import]
 from apps.products.models import Inventory
 
 
 class InventorySerializer(serializers.ModelSerializer):
-    # মডেলের কাস্টম @property ফিল্ডটিকে এপিআই রেসপন্সে দেখানোর জন্য Read-Only ফিল্ড
     available_stock = serializers.IntegerField(read_only=True)
     
     variant_name = serializers.SerializerMethodField()
     product_name = serializers.SerializerMethodField()
+    sku = serializers.SerializerMethodField()
+    brand_name = serializers.SerializerMethodField()
     vendor_name = serializers.SerializerMethodField()
+    unit_cost_bdt = serializers.SerializerMethodField()
+    batch_number = serializers.SerializerMethodField()
 
     class Meta:
         model = Inventory
         fields = [
             'id', 'vendor', 'vendor_name', 'variant', 'product_name', 'variant_name', 
+            'sku', 'brand_name', 'unit_cost_bdt', 'batch_number',
             'stock_qty', 'reserved_qty', 'damaged_qty', 'reorder_level', 
             'available_stock', 'status', 'updated_at'
         ]
@@ -35,16 +40,38 @@ class InventorySerializer(serializers.ModelSerializer):
         except Exception:
             return ""
 
+    def get_sku(self, obj):
+        try:
+            return obj.variant.sku if obj.variant else f"SKU-{obj.id:04d}"
+        except Exception:
+            return f"SKU-{obj.id:04d}"
+
+    def get_brand_name(self, obj):
+        try:
+            if obj.variant and obj.variant.product and obj.variant.product.brand:
+                return obj.variant.product.brand.name
+            return "General Brand"
+        except Exception:
+            return "General Brand"
+
     def get_vendor_name(self, obj):
         try:
-            return obj.vendor.name if obj.vendor else ""
+            return obj.vendor.name if obj.vendor else "Central Warehouse"
         except Exception:
-            return ""
+            return "Central Warehouse"
+
+    def get_unit_cost_bdt(self, obj):
+        try:
+            if obj.variant:
+                return float(obj.variant.cost_price or obj.variant.price or 0.0)
+            return 0.0
+        except Exception:
+            return 0.0
+
+    def get_batch_number(self, obj):
+        return f"BATCH-{obj.id:04d}"
 
     def validate(self, attrs):
-        """
-        Lead Developer Logic: স্টক কাউন্টের ওপর ভিত্তি করে ডাইনামিক স্ট্যাটাস ক্যালকুলেশন
-        """
         stock_qty = attrs.get('stock_qty', self.instance.stock_qty if self.instance else 0)
         reserved_qty = attrs.get('reserved_qty', self.instance.reserved_qty if self.instance else 0)
         damaged_qty = attrs.get('damaged_qty', self.instance.damaged_qty if self.instance else 0)
@@ -69,15 +96,20 @@ class InventorySerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         request = self.context.get('request')
         if not validated_data.get('vendor') and request and hasattr(request, 'user'):
+            # pyrefly: ignore [missing-import]
             from apps.profiles.models import VendorProfile
             user = request.user
             if hasattr(user, 'vendor_profile'):
                 validated_data['vendor'] = user.vendor_profile
             else:
-                vprof, _ = VendorProfile.objects.get_or_create(
-                    user=user,
-                    defaults={'name': f"{user.username} Store", 'slug': f"{user.username}-store", 'status': 'active'}
-                )
+                vprof = VendorProfile.objects.filter(user=user).first()
+                if not vprof:
+                    vprof = VendorProfile.objects.first()
+                if not vprof:
+                    vprof, _ = VendorProfile.objects.get_or_create(
+                        user=user,
+                        defaults={'name': f"{user.username} Store", 'slug': f"{user.username}-store", 'status': 'active'}
+                    )
                 validated_data['vendor'] = vprof
             
         return super().create(validated_data)

@@ -39,12 +39,16 @@ export const DashboardOverview: React.FC = () => {
   const [topProducts, setTopProducts] = useState<TopProductItem[]>([]);
   const [vendors, setVendors] = useState<VendorPerformanceItem[]>([]);
   const [hoveredPoint, setHoveredPoint] = useState<RevenueChartPoint | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    adminAnalyticsApi.getSummary().then(setSummary);
-    adminAnalyticsApi.getCategoryBreakdown().then(setCategories);
-    adminAnalyticsApi.getTopSellingProducts().then(setTopProducts);
-    adminAnalyticsApi.getVendorPerformance().then(setVendors);
+    setLoading(true);
+    Promise.all([
+      adminAnalyticsApi.getSummary().then(setSummary),
+      adminAnalyticsApi.getCategoryBreakdown().then(setCategories),
+      adminAnalyticsApi.getTopSellingProducts().then(setTopProducts),
+      adminAnalyticsApi.getVendorPerformance().then(setVendors),
+    ]).finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -80,14 +84,14 @@ export const DashboardOverview: React.FC = () => {
               className="px-4 py-2.5 rounded-xl bg-primary-500 hover:bg-primary-600 text-white font-semibold text-xs shadow-glow transition-all flex items-center space-x-2"
             >
               <ShoppingCart className="w-4 h-4" />
-              <span>Pending Orders ({summary?.active_orders_count || 42})</span>
+              <span>Pending Orders ({summary?.active_orders_count ?? 0})</span>
             </button>
             <button
               onClick={() => navigate('/admin/prescriptions')}
               className="px-4 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 font-semibold text-xs transition-all flex items-center space-x-2"
             >
               <FileText className="w-4 h-4 text-rose-400" />
-              <span>Rx Queue ({summary?.pending_rx_count || 5})</span>
+              <span>Rx Queue ({summary?.pending_rx_count ?? 0})</span>
             </button>
           </div>
         </div>
@@ -105,11 +109,11 @@ export const DashboardOverview: React.FC = () => {
           </div>
           <div className="mt-4">
             <div className="text-2xl font-head font-bold text-content-primary font-mono">
-              ৳ {summary?.total_revenue.toLocaleString() || '1,485,200'}
+              ৳ {(summary?.total_revenue ?? 0).toLocaleString()}
             </div>
             <div className="flex items-center space-x-1.5 mt-1 text-xs text-emerald-400 font-medium">
               <ArrowUpRight className="w-4 h-4" />
-              <span>+{summary?.revenue_growth_pct || 18.4}% vs last period</span>
+              <span>+{(summary?.revenue_growth_pct ?? 0)}% vs last period</span>
             </div>
           </div>
         </div>
@@ -124,11 +128,11 @@ export const DashboardOverview: React.FC = () => {
           </div>
           <div className="mt-4">
             <div className="text-2xl font-head font-bold text-content-primary font-mono">
-              {summary?.active_orders_count || 42} Active
+              {summary?.active_orders_count ?? 0} Active
             </div>
             <div className="flex items-center space-x-1.5 mt-1 text-xs text-emerald-400 font-medium">
               <ArrowUpRight className="w-4 h-4" />
-              <span>{summary?.dispatch_ready_count || 18} orders ready for dispatch</span>
+              <span>{summary?.dispatch_ready_count ?? 0} orders ready for dispatch</span>
             </div>
           </div>
         </div>
@@ -143,11 +147,11 @@ export const DashboardOverview: React.FC = () => {
           </div>
           <div className="mt-4">
             <div className="text-2xl font-head font-bold text-content-primary font-mono">
-              {summary?.total_customers.toLocaleString() || '24,580'}
+              {(summary?.total_customers ?? 0).toLocaleString()}
             </div>
             <div className="flex items-center space-x-1.5 mt-1 text-xs text-emerald-400 font-medium">
               <ArrowUpRight className="w-4 h-4" />
-              <span>+{summary?.new_customers_today || 142} new today</span>
+              <span>+{summary?.new_customers_today ?? 0} new today</span>
             </div>
           </div>
         </div>
@@ -162,11 +166,11 @@ export const DashboardOverview: React.FC = () => {
           </div>
           <div className="mt-4">
             <div className="text-2xl font-head font-bold text-content-primary font-mono">
-              {summary?.pending_rx_count || 5} Pending
+              {summary?.pending_rx_count ?? 0} Pending
             </div>
             <div className="flex items-center space-x-1.5 mt-1 text-xs text-amber-400 font-medium">
               <Clock className="w-4 h-4" />
-              <span>Avg review time: {summary?.avg_rx_review_mins || 4}m</span>
+              <span>Avg review time: {summary?.avg_rx_review_mins ?? 0}m</span>
             </div>
           </div>
         </div>
@@ -219,7 +223,7 @@ export const DashboardOverview: React.FC = () => {
             {/* SVG Bars & Area Fill Curve */}
             <div className="relative flex-1 flex items-end justify-between gap-2 pt-6 pb-2 px-2">
               {chartData.map((pt, idx) => {
-                const heightPct = (pt.revenue / maxRevenue) * 100;
+                const heightPct = maxRevenue > 0 ? (pt.revenue / maxRevenue) * 100 : 0;
                 return (
                   <div
                     key={idx}
@@ -229,11 +233,11 @@ export const DashboardOverview: React.FC = () => {
                   >
                     {/* Revenue Bar with gradient */}
                     <div
-                      style={{ height: `${Math.max(8, heightPct)}%` }}
+                      style={{ height: `${Math.max(4, heightPct)}%` }}
                       className="w-full max-w-[36px] bg-gradient-to-t from-primary-600/40 via-primary-500/80 to-primary-400 rounded-t-lg group-hover:from-primary-500 group-hover:to-accent-400 transition-all duration-300 relative"
                     >
                       <div className="opacity-0 group-hover:opacity-100 absolute -top-7 left-1/2 -translate-x-1/2 bg-black/80 px-2 py-0.5 rounded text-[10px] text-white font-mono whitespace-nowrap transition-opacity">
-                        ৳{pt.revenue >= 100000 ? `${(pt.revenue / 1000).toFixed(0)}k` : pt.revenue}
+                        ৳{pt.revenue >= 100000 ? `${(pt.revenue / 1000).toFixed(0)}k` : pt.revenue.toLocaleString()}
                       </div>
                     </div>
                   </div>
@@ -267,52 +271,64 @@ export const DashboardOverview: React.FC = () => {
           {/* SVG Donut Visual */}
           <div className="flex items-center justify-center py-2">
             <div className="relative w-40 h-40 flex items-center justify-center">
-              <svg viewBox="0 0 36 36" className="w-full h-full transform -rotate-90">
-                {categories.reduce<{ offset: number; elements: React.ReactNode[] }>(
-                  (acc, cat, idx) => {
-                    const strokeDasharray = `${cat.percentage} ${100 - cat.percentage}`;
-                    const strokeDashoffset = -acc.offset;
-                    acc.elements.push(
-                      <circle
-                        key={idx}
-                        cx="18"
-                        cy="18"
-                        r="15.915"
-                        fill="transparent"
-                        stroke={cat.color}
-                        strokeWidth="3.8"
-                        strokeDasharray={strokeDasharray}
-                        strokeDashoffset={strokeDashoffset}
-                        className="transition-all duration-500 hover:stroke-width-5 cursor-pointer"
-                      />
-                    );
-                    acc.offset += cat.percentage;
-                    return acc;
-                  },
-                  { offset: 0, elements: [] }
-                ).elements}
-              </svg>
-              <div className="absolute flex flex-col items-center justify-center text-center">
+              {categories.length > 0 && categories.some((c) => c.percentage > 0) ? (
+                <svg viewBox="0 0 36 36" className="w-full h-full transform -rotate-90">
+                  {categories.reduce<{ offset: number; elements: React.ReactNode[] }>(
+                    (acc, cat, idx) => {
+                      const strokeDasharray = `${cat.percentage} ${100 - cat.percentage}`;
+                      const strokeDashoffset = -acc.offset;
+                      acc.elements.push(
+                        <circle
+                          key={idx}
+                          cx="18"
+                          cy="18"
+                          r="15.915"
+                          fill="transparent"
+                          stroke={cat.color}
+                          strokeWidth="3.8"
+                          strokeDasharray={strokeDasharray}
+                          strokeDashoffset={strokeDashoffset}
+                          className="transition-all duration-500 hover:stroke-width-5 cursor-pointer"
+                        />
+                      );
+                      acc.offset += cat.percentage;
+                      return acc;
+                    },
+                    { offset: 0, elements: [] }
+                  ).elements}
+                </svg>
+              ) : (
+                <div className="w-32 h-32 rounded-full border-4 border-dashed border-bg-border flex items-center justify-center text-[10px] text-content-muted text-center p-2 font-mono">
+                  No Sales Data Yet
+                </div>
+              )}
+              <div className="absolute flex flex-col items-center justify-center text-center pointer-events-none">
                 <span className="text-xs text-content-muted font-mono">Total Sales</span>
-                <span className="text-base font-bold font-mono text-content-primary">100%</span>
+                <span className="text-base font-bold font-mono text-content-primary">
+                  {categories.some((c) => c.percentage > 0) ? '100%' : '0%'}
+                </span>
               </div>
             </div>
           </div>
 
           {/* Category Legends list */}
-          <div className="space-y-2 pt-2 border-t border-bg-border">
-            {categories.map((cat, idx) => (
-              <div key={idx} className="flex items-center justify-between text-xs font-medium">
-                <div className="flex items-center space-x-2 truncate">
-                  <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: cat.color }} />
-                  <span className="text-content-primary truncate">{cat.name}</span>
+          <div className="space-y-2 pt-2 border-t border-bg-border max-h-44 overflow-y-auto">
+            {categories.length > 0 ? (
+              categories.map((cat, idx) => (
+                <div key={idx} className="flex items-center justify-between text-xs font-medium">
+                  <div className="flex items-center space-x-2 truncate">
+                    <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: cat.color }} />
+                    <span className="text-content-primary truncate">{cat.name}</span>
+                  </div>
+                  <div className="font-mono text-content-muted flex items-center space-x-2">
+                    <span>৳{cat.amount >= 1000 ? `${(cat.amount / 1000).toFixed(0)}k` : cat.amount}</span>
+                    <span className="font-bold text-content-primary font-mono">{cat.percentage}%</span>
+                  </div>
                 </div>
-                <div className="font-mono text-content-muted flex items-center space-x-2">
-                  <span>৳{(cat.amount / 1000).toFixed(0)}k</span>
-                  <span className="font-bold text-content-primary font-mono">{cat.percentage}%</span>
-                </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <div className="text-xs text-content-muted text-center py-3">No categories found</div>
+            )}
           </div>
         </div>
       </div>
@@ -351,21 +367,29 @@ export const DashboardOverview: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-bg-border">
-                {topProducts.map((p, idx) => (
-                  <tr key={p.id} className="hover:bg-bg-hover transition-colors">
-                    <td className="py-3 px-3 font-mono font-bold text-amber-400">0{idx + 1}</td>
-                    <td className="py-3 px-3">
-                      <div className="font-bold text-content-primary">{p.name}</div>
-                      <div className="text-[11px] text-content-muted font-mono">{p.variant_name}</div>
-                    </td>
-                    <td className="py-3 px-3 font-mono font-bold text-emerald-400">
-                      {p.sales_count.toLocaleString()} pcs
-                    </td>
-                    <td className="py-3 px-3 font-mono font-bold text-content-primary text-right">
-                      ৳ {p.total_revenue.toLocaleString()}
+                {topProducts.length > 0 ? (
+                  topProducts.map((p, idx) => (
+                    <tr key={p.id || idx} className="hover:bg-bg-hover transition-colors">
+                      <td className="py-3 px-3 font-mono font-bold text-amber-400">0{idx + 1}</td>
+                      <td className="py-3 px-3">
+                        <div className="font-bold text-content-primary">{p.name}</div>
+                        <div className="text-[11px] text-content-muted font-mono">{p.variant_name || p.category}</div>
+                      </td>
+                      <td className="py-3 px-3 font-mono font-bold text-emerald-400">
+                        {p.sales_count.toLocaleString()} pcs
+                      </td>
+                      <td className="py-3 px-3 font-mono font-bold text-content-primary text-right">
+                        ৳ {p.total_revenue.toLocaleString()}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="py-6 text-center text-content-muted font-mono text-xs">
+                      No products sales recorded yet
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
@@ -403,23 +427,31 @@ export const DashboardOverview: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-bg-border">
-                {vendors.map((v) => (
-                  <tr key={v.id} className="hover:bg-bg-hover transition-colors">
-                    <td className="py-3 px-3">
-                      <div className="font-bold text-content-primary">{v.name}</div>
-                      <div className="text-[11px] text-content-muted">{v.location}</div>
-                    </td>
-                    <td className="py-3 px-3 font-mono font-bold text-primary-400">
-                      {v.orders_fulfilled} Orders
-                    </td>
-                    <td className="py-3 px-3 font-mono text-amber-400 font-bold">
-                      ★ {v.rating}
-                    </td>
-                    <td className="py-3 px-3 font-mono font-bold text-content-primary text-right">
-                      ৳ {v.total_payout.toLocaleString()}
+                {vendors.length > 0 ? (
+                  vendors.map((v, idx) => (
+                    <tr key={v.id || idx} className="hover:bg-bg-hover transition-colors">
+                      <td className="py-3 px-3">
+                        <div className="font-bold text-content-primary">{v.name}</div>
+                        <div className="text-[11px] text-content-muted">{v.location}</div>
+                      </td>
+                      <td className="py-3 px-3 font-mono font-bold text-primary-400">
+                        {v.orders_fulfilled} Orders
+                      </td>
+                      <td className="py-3 px-3 font-mono text-amber-400 font-bold">
+                        ★ {v.rating}
+                      </td>
+                      <td className="py-3 px-3 font-mono font-bold text-content-primary text-right">
+                        ৳ {v.total_payout.toLocaleString()}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="py-6 text-center text-content-muted font-mono text-xs">
+                      No vendors registered yet
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>

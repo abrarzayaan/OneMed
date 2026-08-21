@@ -24,9 +24,13 @@ import {
 import toast from 'react-hot-toast';
 import { adminInventoryApi } from '../api/adminInventory.api';
 import type { StockBatch } from '../api/adminInventory.api';
+import { adminCatalogApi } from '../api/adminCatalog.api';
+import type { AdminVariantItem } from '../types/admin.types';
 
 export const InventoryManagementPage: React.FC = () => {
   const [batches, setBatches] = useState<StockBatch[]>([]);
+  const [variantsList, setVariantsList] = useState<AdminVariantItem[]>([]);
+  const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Search & Filter State
@@ -55,9 +59,18 @@ export const InventoryManagementPage: React.FC = () => {
 
   const loadInventory = async () => {
     setLoading(true);
-    const data = await adminInventoryApi.getInventoryBatches();
-    setBatches(data);
-    setLoading(false);
+    try {
+      const [invData, varData] = await Promise.all([
+        adminInventoryApi.getInventoryBatches(),
+        adminCatalogApi.getVariants().catch(() => []),
+      ]);
+      setBatches(invData);
+      setVariantsList(varData);
+    } catch {
+      setBatches([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -142,7 +155,7 @@ export const InventoryManagementPage: React.FC = () => {
     }
 
     const payload = {
-      variant_id: 101,
+      variant_id: selectedVariantId || (variantsList[0] ? variantsList[0].id : 1),
       variant_name: formVariantName,
       sku: formSku || `SKU-${Math.floor(Math.random() * 9000 + 1000)}`,
       brand_name: formBrandName,
@@ -581,6 +594,36 @@ export const InventoryManagementPage: React.FC = () => {
             </div>
 
             <form onSubmit={handleSaveBatchForm} className="space-y-4">
+              {variantsList.length > 0 && !editingBatchId && (
+                <div>
+                  <label className="block text-xs font-mono font-bold text-primary-400 mb-1">
+                    Select Existing Product Variant (Optional)
+                  </label>
+                  <select
+                    value={selectedVariantId || ''}
+                    onChange={(e) => {
+                      const id = Number(e.target.value);
+                      setSelectedVariantId(id || null);
+                      const found = variantsList.find((v) => v.id === id);
+                      if (found) {
+                        setFormVariantName(found.variant_name || found.product_name || '');
+                        setFormSku(found.sku || '');
+                        setFormBrandName(found.brand_name || 'General Brand');
+                        setFormUnitCost(found.cost_price || found.price || 20);
+                      }
+                    }}
+                    className="w-full px-3.5 py-2 rounded-xl bg-bg-surface border border-bg-border text-xs text-content-primary focus:border-primary-500 focus:outline-none"
+                  >
+                    <option value="">-- Choose from Catalog or Enter Manually --</option>
+                    {variantsList.map((v) => (
+                      <option key={v.id} value={v.id}>
+                        {v.product_name ? `${v.product_name} - ` : ''}{v.variant_name} ({v.sku})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div>
                 <label className="block text-xs font-mono font-bold text-content-muted mb-1">
                   Medicine Variant Name *
