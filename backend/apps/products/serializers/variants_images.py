@@ -1,4 +1,8 @@
+import os
+import requests
+from django.core.files.base import ContentFile
 from rest_framework import serializers
+# pyrefly: ignore [missing-import]
 from apps.products.models import ProductVariant, ProductImage
 
 
@@ -24,7 +28,6 @@ class FlexibleImageField(serializers.Field):
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
-    image_url = FlexibleImageField()
     variant_name = serializers.CharField(source='variant.variant_name', read_only=True)
     product_name = serializers.CharField(source='variant.product.name', read_only=True)
 
@@ -34,6 +37,7 @@ class ProductImageSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at']
 
     def to_internal_value(self, data):
+        # Support fallback if client sends 'image' key instead of 'image_url'
         if hasattr(data, 'copy'):
             data = data.copy()
         elif isinstance(data, dict):
@@ -41,6 +45,18 @@ class ProductImageSerializer(serializers.ModelSerializer):
             
         if 'image' in data and 'image_url' not in data:
             data['image_url'] = data['image']
+
+        image_val = data.get('image_url')
+        if isinstance(image_val, str) and (image_val.startswith('http://') or image_val.startswith('https://')):
+            try:
+                resp = requests.get(image_val, timeout=15)
+                if resp.status_code == 200:
+                    filename = os.path.basename(image_val.split('?')[0]) or 'downloaded_image.jpg'
+                    if not any(filename.lower().endswith(ext) for ext in ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp']):
+                        filename = f"{filename}.jpg"
+                    data['image_url'] = ContentFile(resp.content, name=filename)
+            except Exception:
+                pass
 
         return super().to_internal_value(data)
 
