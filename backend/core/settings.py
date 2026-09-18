@@ -64,6 +64,11 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = 'authentication.Users'
 
+AUTHENTICATION_BACKENDS = [
+    'apps.authentication.backends.PhoneEmailUsernameAuthenticationBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 # REST Framework, JWT এবং Swagger কনফিগারেশন
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
