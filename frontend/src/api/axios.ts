@@ -8,6 +8,11 @@ const getApiBaseUrl = () => {
   return import.meta.env.VITE_API_BASE_URL || '/api';
 };
 
+const API_URL =
+  import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
+export default api;
+
 const api = axios.create({
   baseURL: getApiBaseUrl(),
   headers: { 'Content-Type': 'application/json' },
@@ -31,7 +36,7 @@ api.interceptors.response.use(
   (error) => {
     const isAuthRequest = error.config?.url?.includes('/auth/');
     const isPortalRoute = typeof window !== 'undefined' && (
-      window.location.pathname.startsWith('/admin') || 
+      window.location.pathname.startsWith('/admin') ||
       window.location.pathname.startsWith('/vendor') ||
       window.location.pathname.startsWith('/rider')
     );
