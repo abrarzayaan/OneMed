@@ -8,9 +8,11 @@ from django.conf import settings
 from django.conf.urls.static import static
 # pyrefly: ignore [missing-import]
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from core.views import health_check
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/health/', health_check, name='health_check'),
     
     # Apps URLs
     path('api/auth/', include('apps.authentication.urls')),
