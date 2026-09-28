@@ -2,10 +2,10 @@ import axios from 'axios';
 import { useAuthStore } from '@/store/auth.store';
 
 const getApiBaseUrl = () => {
-  if (typeof window !== 'undefined') {
-    return '/api';
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
   }
-  return import.meta.env.VITE_API_BASE_URL || '/api';
+  return '/api';
 };
 
 const api = axios.create({

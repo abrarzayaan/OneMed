@@ -9,7 +9,7 @@ const AdminAccessDeniedRedirect: React.FC = () => {
     toast.error('Access Denied: Please log in with an authorized Admin account.');
   }, []);
 
-  return <Navigate to="/login?redirect=/admin" replace />;
+  return <Navigate to="/admin/login" replace />;
 };
 
 export const AdminGuard: React.FC = () => {
@@ -18,7 +18,7 @@ export const AdminGuard: React.FC = () => {
 
   // Check if user is authenticated
   if (!isLoggedIn || !user) {
-    return <Navigate to="/login?redirect=/admin" replace />;
+    return <Navigate to="/admin/login" replace />;
   }
 
   // Check if user has Admin / Superadmin privileges

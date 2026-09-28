@@ -1,4 +1,5 @@
 {
+  "id": "/rider",
   "name": "OneMed Rider — Express Logistics",
   "short_name": "OneMed Rider",
   "description": "Delivery logistics, order dispatch routing, and earnings tracker for OneMed Express Riders.",
@@ -6,7 +7,7 @@
   "background_color": "#020617",
   "display": "standalone",
   "orientation": "portrait",
-  "start_url": "/rider/dashboard",
+  "start_url": "/rider",
   "scope": "/rider",
   "categories": ["navigation", "logistics", "medical"],
   "icons": [

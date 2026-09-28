@@ -15,6 +15,7 @@ import { VendorVerificationPage } from '../pages/VendorVerificationPage';
 import { RiderVerificationPage } from '../pages/RiderVerificationPage';
 import { LogisticsFleetPage } from '../pages/LogisticsFleetPage';
 import { AdminSectionPlaceholder } from '../pages/AdminSectionPlaceholder';
+import { AdminLoginPage } from '../pages/AdminLoginPage';
 import {
   FileCheck2,
   Percent,
@@ -22,6 +23,10 @@ import {
 } from 'lucide-react';
 
 export const adminRoutes: RouteObject[] = [
+  {
+    path: '/admin/login',
+    element: <AdminLoginPage />,
+  },
   {
     path: '/admin',
     element: <AdminGuard />,

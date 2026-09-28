@@ -25,6 +25,7 @@ export default defineConfig({
         'pwa-rider-512x512-maskable.png',
       ],
       manifest: {
+        id: '/',
         name: 'OneMed — Healthcare & Online Pharmacy',
         short_name: 'OneMed',
         description: 'Order medicines, track live order fulfillment, and access expert pharmacy services instantly.',

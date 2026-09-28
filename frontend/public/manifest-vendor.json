@@ -1,4 +1,5 @@
 {
+  "id": "/vendor",
   "name": "OneMed Partner — Vendor Portal",
   "short_name": "OneMed Vendor",
   "description": "Manage pharmacy inventory, process incoming orders, and track fulfillment with OneMed Vendor Partner Portal.",
