@@ -255,8 +255,67 @@ export const VendorDashboardPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Data Table */}
-        <div className="overflow-x-auto">
+        {/* Mobile View: Native Dispatch Cards (md:hidden) */}
+        <div className="md:hidden space-y-3">
+          {loading ? (
+            <div className="py-12 text-center text-gray-400">
+              <RefreshCw size={24} className="animate-spin text-emerald-500 mx-auto mb-2" />
+              <span>Loading dispatch inventory out-list...</span>
+            </div>
+          ) : filteredDispatches.length === 0 ? (
+            <div className="py-12 text-center text-gray-400">
+              <PackageCheck size={36} className="text-gray-600 mx-auto mb-2" />
+              <p className="font-semibold text-gray-300">No Dispatched Items Recorded</p>
+              <p className="text-xs text-gray-500 mt-1">
+                Allocated dispatch orders will appear here automatically.
+              </p>
+            </div>
+          ) : (
+            filteredDispatches.map((item) => (
+              <div
+                key={item.order_item_id}
+                className="bg-[#161924] border border-[#24283b] rounded-2xl p-4 space-y-3 shadow-md"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-mono font-bold text-xs text-emerald-400">
+                    {item.order_number}
+                  </span>
+                  <div>{getStatusBadge(item.order_status)}</div>
+                </div>
+
+                <div className="space-y-0.5">
+                  <div className="font-semibold text-white text-sm">{item.product_name}</div>
+                  <div className="text-xs text-gray-400 flex items-center gap-2">
+                    <span>{item.variant_name}</span>
+                    <span>•</span>
+                    <span className="font-mono text-gray-500">{item.variant_sku}</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 py-2 px-3 rounded-xl bg-[#12141c] border border-[#1e2230] text-xs">
+                  <div>
+                    <span className="text-[10px] text-gray-400 block">Quantity</span>
+                    <span className="font-bold text-emerald-400">{item.quantity} pcs</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] text-gray-400 block">Total Value</span>
+                    <span className="font-mono font-bold text-white">৳{item.total_price.toLocaleString()}</span>
+                  </div>
+                </div>
+
+                {item.customer_area && (
+                  <div className="text-xs text-gray-400 flex items-center gap-1.5 pt-1 border-t border-[#1e2230]">
+                    <span className="text-[10px] uppercase font-bold text-gray-500">Zone:</span>
+                    <span>{item.customer_area}</span>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Desktop View: Data Table (hidden md:block) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse min-w-[700px]">
             <thead>
               <tr className="border-b border-[#1e2230] text-gray-400 font-semibold uppercase tracking-wider">

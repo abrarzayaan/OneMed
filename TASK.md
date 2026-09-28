@@ -18,11 +18,11 @@ This task list tracks all remaining features and optimizations required before r
 ---
 
 ## 📐 Task 2: Mobile Responsiveness Audit & Polish
-- [ ] **Consumer Portal Responsiveness**:
+- [x] **Consumer Portal Responsiveness**:
   - Verify layout, header, drawer, navigation bar, product cards, and checkout pages on small & medium screens.
-- [ ] **Vendor Portal Responsiveness**:
+- [x] **Vendor Portal Responsiveness**:
   - Optimize vendor dashboard, inventory table, order management cards, and analytics on mobile viewports.
-- [ ] **Rider Portal Responsiveness**:
+- [x] **Rider Portal Responsiveness**:
   - Ensure rider dashboard, live order pickup/delivery workflow, and map view are touch-friendly and fluid on all mobile screen sizes.
 
 ---

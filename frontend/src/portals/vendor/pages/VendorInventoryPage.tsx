@@ -281,8 +281,74 @@ export const VendorInventoryPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Stock Inventory Table */}
-        <div className="overflow-x-auto">
+        {/* Mobile View: Native Inventory Cards (md:hidden) */}
+        <div className="md:hidden space-y-3">
+          {loading ? (
+            <div className="py-12 text-center text-gray-400">
+              <RefreshCw size={24} className="animate-spin text-emerald-400 mx-auto mb-2" />
+              <span>Loading pharmacy inventory records...</span>
+            </div>
+          ) : filteredInventories.length === 0 ? (
+            <div className="py-12 text-center text-gray-400">
+              <Package size={36} className="text-gray-600 mx-auto mb-2" />
+              <p className="font-semibold text-white">No Inventory Items Found</p>
+              <p className="text-xs text-gray-500 mt-1">
+                Click <strong className="text-emerald-400">+ Add Product Stock</strong> above to assign stock to medicines.
+              </p>
+            </div>
+          ) : (
+            filteredInventories.map((item) => (
+              <div
+                key={item.id}
+                className="bg-[#171a26]/80 border border-[#24283b] rounded-2xl p-4 space-y-3 shadow-md"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-sm shrink-0">
+                      <Pill size={18} />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-white text-sm leading-tight">{item.product_name}</h4>
+                      <p className="text-xs text-gray-400 mt-0.5">{item.variant_name}</p>
+                    </div>
+                  </div>
+                  <div>{getStatusTag(item.status)}</div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 py-2 px-3 rounded-xl bg-[#12141c] border border-[#1e2230] text-center text-xs">
+                  <div>
+                    <span className="text-[10px] text-gray-400 block">Physical</span>
+                    <span className="font-bold text-white text-sm">{item.stock_qty}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-gray-400 block">Available</span>
+                    <span className="font-extrabold text-emerald-400 text-sm">{item.available_stock}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-gray-400 block">Reorder</span>
+                    <span className="font-mono text-gray-300 text-xs">{item.reorder_level}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-1">
+                  <div className="text-xs font-mono text-emerald-400 font-bold">
+                    ৳{item.unit_price.toFixed(2)}
+                  </div>
+                  <button
+                    onClick={() => handleOpenEditModal(item)}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 text-xs font-semibold transition-all"
+                  >
+                    <Edit2 size={13} />
+                    <span>Update Stock</span>
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Desktop View: Full Data Table (hidden md:block) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse min-w-[750px]">
             <thead>
               <tr className="border-b border-[#1e2230] text-gray-400 font-semibold uppercase tracking-wider">
