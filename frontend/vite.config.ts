@@ -10,7 +10,20 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      includeAssets: ['favicon.svg', 'favicon-32x32.png', 'apple-touch-icon.png', 'icons.svg'],
+      includeAssets: [
+        'favicon.svg',
+        'favicon-32x32.png',
+        'apple-touch-icon.png',
+        'icons.svg',
+        'manifest-vendor.json',
+        'manifest-rider.json',
+        'pwa-vendor-192x192.png',
+        'pwa-vendor-512x512.png',
+        'pwa-vendor-512x512-maskable.png',
+        'pwa-rider-192x192.png',
+        'pwa-rider-512x512.png',
+        'pwa-rider-512x512-maskable.png',
+      ],
       manifest: {
         name: 'OneMed — Healthcare & Online Pharmacy',
         short_name: 'OneMed',
@@ -45,6 +58,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/api/, /^\/media/, /^\/admin/],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -71,6 +86,50 @@ export default defineConfig({
               },
               cacheableResponse: {
                 statuses: [0, 200],
+              },
+            },
+          },
+          {
+            // Offline caching for Vendor Portal APIs (Stock, Profile, Dashboard)
+            urlPattern: /\/api\/vendor\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'onemed-vendor-api-cache',
+              networkTimeoutSeconds: 4,
+              expiration: {
+                maxEntries: 60,
+                maxAgeSeconds: 60 * 60 * 24, // 24 hours
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          {
+            // Offline caching for Rider Logistics APIs (Assigned orders, Profile, Stats)
+            urlPattern: /\/api\/rider\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'onemed-rider-api-cache',
+              networkTimeoutSeconds: 4,
+              expiration: {
+                maxEntries: 60,
+                maxAgeSeconds: 60 * 60 * 24, // 24 hours
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          {
+            // Cache PWA sub-manifests and app icons
+            urlPattern: /\/(?:manifest.*\.json|pwa-.*\.png)$/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'onemed-pwa-static-cache',
+              expiration: {
+                maxEntries: 20,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
               },
             },
           },

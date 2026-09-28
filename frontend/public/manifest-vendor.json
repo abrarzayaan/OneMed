@@ -1,0 +1,32 @@
+{
+  "name": "OneMed Partner — Vendor Portal",
+  "short_name": "OneMed Vendor",
+  "description": "Manage pharmacy inventory, process incoming orders, and track fulfillment with OneMed Vendor Partner Portal.",
+  "theme_color": "#10b981",
+  "background_color": "#0b0c10",
+  "display": "standalone",
+  "orientation": "portrait",
+  "start_url": "/vendor",
+  "scope": "/vendor",
+  "categories": ["business", "medical", "productivity"],
+  "icons": [
+    {
+      "src": "/pwa-vendor-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-vendor-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-vendor-512x512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

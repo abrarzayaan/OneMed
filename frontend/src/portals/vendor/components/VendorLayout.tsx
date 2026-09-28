@@ -16,9 +16,13 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import { vendorApi, type VendorProfile } from '@/api/vendor.api';
+import { usePortalPWA } from '@/hooks/usePortalPWA';
+import { OfflineBanner } from '@/components/ui/OfflineBanner';
+import { VendorPWAInstallPrompt } from './VendorPWAInstallPrompt';
 import toast from 'react-hot-toast';
 
 export const VendorLayout: React.FC = () => {
+  usePortalPWA('vendor');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [vendorProfile, setVendorProfile] = useState<VendorProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -250,6 +254,10 @@ export const VendorLayout: React.FC = () => {
           <span className="text-[10px]">Store Settings</span>
         </Link>
       </div>
+
+      {/* Offline Alert & PWA Install Banner */}
+      <OfflineBanner portalName="Vendor Partner Portal" />
+      <VendorPWAInstallPrompt />
     </div>
   );
 };

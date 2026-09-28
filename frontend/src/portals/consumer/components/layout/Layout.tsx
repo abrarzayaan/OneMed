@@ -7,11 +7,14 @@ import MobileNav from './MobileNav';
 import CartDrawer from '@/portals/consumer/components/cart/CartDrawer';
 import CategoryModal from '@/portals/consumer/components/product/CategoryModal';
 import PWAInstallPrompt from '@/components/ui/PWAInstallPrompt';
+import { OfflineBanner } from '@/components/ui/OfflineBanner';
+import { usePortalPWA } from '@/hooks/usePortalPWA';
 
 import { useThemeStore } from '@/store/theme.store';
 import { useCart } from '@/hooks/useCart';
 
 export default function Layout() {
+  usePortalPWA('consumer');
   const { pathname } = useLocation();
   const initTheme = useThemeStore((s) => s.initTheme);
   
@@ -57,6 +60,9 @@ export default function Layout() {
 
       {/* PWA Install Prompt Banner for Mobile Chrome & Desktop */}
       <PWAInstallPrompt />
+
+      {/* Offline Banner for Connectivity Detection */}
+      <OfflineBanner portalName="OneMed Pharmacy" />
     </div>
   );
 }

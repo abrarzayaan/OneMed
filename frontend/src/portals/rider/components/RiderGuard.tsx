@@ -2,9 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/auth.store';
 import { riderApi, type RiderProfile } from '@/api/rider.api';
+import { usePortalPWA } from '@/hooks/usePortalPWA';
+import { OfflineBanner } from '@/components/ui/OfflineBanner';
+import { RiderPWAInstallPrompt } from './RiderPWAInstallPrompt';
 import { Loader2 } from 'lucide-react';
 
 export const RiderGuard: React.FC = () => {
+  usePortalPWA('rider');
   const { isLoggedIn, user } = useAuthStore();
   const location = useLocation();
   const [loading, setLoading] = useState<boolean>(true);
@@ -68,5 +72,11 @@ export const RiderGuard: React.FC = () => {
     return <Navigate to="/rider/dashboard" replace />;
   }
 
-  return <Outlet />;
+  return (
+    <>
+      <OfflineBanner portalName="Rider Express Logistics" />
+      <Outlet />
+      <RiderPWAInstallPrompt />
+    </>
+  );
 };

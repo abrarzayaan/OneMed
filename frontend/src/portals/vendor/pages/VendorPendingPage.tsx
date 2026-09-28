@@ -3,9 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { Clock, ShieldAlert, RefreshCw, LogOut, CheckCircle2, PhoneCall } from 'lucide-react';
 import { vendorApi, type VendorProfile } from '@/api/vendor.api';
 import { useAuthStore } from '@/store/auth.store';
+import { usePortalPWA } from '@/hooks/usePortalPWA';
+import { OfflineBanner } from '@/components/ui/OfflineBanner';
+import { VendorPWAInstallPrompt } from '../components/VendorPWAInstallPrompt';
 import toast from 'react-hot-toast';
 
 export const VendorPendingPage: React.FC = () => {
+  usePortalPWA('vendor');
   const [profile, setProfile] = useState<VendorProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -95,6 +99,8 @@ export const VendorPendingPage: React.FC = () => {
           <span>Need urgent approval? Contact OneMed Support: +880 1334-317864</span>
         </div>
       </div>
+      <OfflineBanner portalName="Vendor Partner Portal" />
+      <VendorPWAInstallPrompt />
     </div>
   );
 };

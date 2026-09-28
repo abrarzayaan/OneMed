@@ -4,9 +4,13 @@ import { Bike, Phone, Lock, ArrowRight, ShieldCheck, Loader2, Sparkles } from 'l
 import { authApi } from '@/api/auth.api';
 import { riderApi } from '@/api/rider.api';
 import { useAuthStore } from '@/store/auth.store';
+import { usePortalPWA } from '@/hooks/usePortalPWA';
+import { OfflineBanner } from '@/components/ui/OfflineBanner';
+import { RiderPWAInstallPrompt } from '../components/RiderPWAInstallPrompt';
 import toast from 'react-hot-toast';
 
 export const RiderLoginPage: React.FC = () => {
+  usePortalPWA('rider');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -151,6 +155,8 @@ export const RiderLoginPage: React.FC = () => {
         </div>
 
       </div>
+      <OfflineBanner portalName="Rider Express Logistics" />
+      <RiderPWAInstallPrompt />
     </div>
   );
 };

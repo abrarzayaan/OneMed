@@ -6,11 +6,11 @@ This task list tracks all remaining features and optimizations required before r
 
 ## 📱 Task 1: PWA Integration for Portals
 - [x] **Consumer Portal PWA**: Basic PWA manifest and service worker configured (`/`).
-- [ ] **Vendor Portal PWA (`/vendor`)**:
+- [x] **Vendor Portal PWA (`/vendor`)**:
   - Add web manifest / sub-app PWA configuration & PWA icons for Vendor Portal.
   - Implement PWA install banner / prompt for Vendors.
   - Enable offline fallback / caching strategy for Vendor portal routes.
-- [ ] **Rider Portal PWA (`/rider`)**:
+- [x] **Rider Portal PWA (`/rider`)**:
   - Add web manifest / sub-app PWA configuration & PWA icons for Rider Portal.
   - Implement PWA install banner / prompt for Delivery Riders.
   - Enable offline fallback / caching strategy for Rider portal routes.

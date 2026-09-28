@@ -4,9 +4,13 @@ import { Building2, Lock, Mail, Eye, EyeOff, ArrowRight, ShieldCheck, CheckCircl
 import { useAuthStore } from '@/store/auth.store';
 import { authApi } from '@/api/auth.api';
 import { vendorApi } from '@/api/vendor.api';
+import { usePortalPWA } from '@/hooks/usePortalPWA';
+import { OfflineBanner } from '@/components/ui/OfflineBanner';
+import { VendorPWAInstallPrompt } from '../components/VendorPWAInstallPrompt';
 import toast from 'react-hot-toast';
 
 export const VendorLoginPage: React.FC = () => {
+  usePortalPWA('vendor');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -167,6 +171,8 @@ export const VendorLoginPage: React.FC = () => {
           </div>
         </div>
       </div>
+      <OfflineBanner portalName="Vendor Partner Portal" />
+      <VendorPWAInstallPrompt />
     </div>
   );
 };
