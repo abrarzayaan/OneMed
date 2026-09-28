@@ -59,7 +59,4 @@ export const consumerRoutes: RouteObject[] = [
       },
     ],
   },
-
-  // Fallback 404
-  { path: '*', element: wrap(<NotFoundPage />) },
 ];
