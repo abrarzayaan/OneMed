@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { ShieldAlert, ShieldCheck, Lock, Phone, ArrowRight, Sparkles, Building2, UserCheck } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, Lock, Phone, ArrowRight, Sparkles, Building2 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import { authApi } from '@/api/auth.api';
 import toast from 'react-hot-toast';
@@ -26,23 +26,21 @@ export const AdminLoginPage: React.FC = () => {
       const res = await authApi.login({ phone, password });
       const { access, refresh, user } = res.data;
 
-      const adminUser = user || {
-        phone,
-        role: 'SUPERADMIN',
-        is_superuser: true,
-        is_staff: true,
-        first_name: 'Admin',
-        last_name: 'User',
-      };
-
-      // Ensure admin privileges
-      if (!adminUser.role || adminUser.role === 'consumer') {
-        adminUser.role = 'SUPERADMIN';
-        adminUser.is_superuser = true;
+      if (!access) {
+        toast.error('Authentication failed: No valid access token received from server.');
+        return;
       }
 
-      setAuth(access || 'demo-admin-token', refresh || 'demo-refresh-token', adminUser);
-      toast.success('Authenticated as Enterprise Administrator');
+      const isSuper = Boolean(user?.is_superuser || user?.role === 'SUPERADMIN');
+      const isStaff = Boolean(user?.is_staff || user?.role === 'ADMIN');
+
+      if (!isSuper && !isStaff) {
+        toast.error('Access Denied: This account is not authorized for Enterprise Administration.');
+        return;
+      }
+
+      setAuth(access, refresh || '', user);
+      toast.success(`Authenticated as ${user.staff_role || (isSuper ? 'Super Administrator' : 'Staff Admin')}`);
       navigate('/admin', { replace: true });
     } catch (err: any) {
       const msg = err?.response?.data?.error || err?.response?.data?.detail || 'Invalid admin credentials';
@@ -50,20 +48,6 @@ export const AdminLoginPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleQuickDemoAccess = () => {
-    setAuth('preview-admin-jwt-token', 'preview-refresh-token', {
-      phone: '01700000000',
-      role: 'SUPERADMIN',
-      is_superuser: true,
-      is_staff: true,
-      first_name: 'Super',
-      last_name: 'Admin',
-      email: 'admin@onemed.internal',
-    });
-    toast.success('Admin privileges unlocked. Opening console...');
-    navigate('/admin', { replace: true });
   };
 
   return (
@@ -141,23 +125,8 @@ export const AdminLoginPage: React.FC = () => {
           </button>
         </form>
 
-        {/* Quick Demo Access Button (Guarantees Admin portal test works smoothly on Render preview) */}
-        <div className="mt-6 pt-5 border-t border-slate-800/80">
-          <button
-            type="button"
-            onClick={handleQuickDemoAccess}
-            className="w-full flex items-center justify-center gap-2 bg-slate-800/60 hover:bg-slate-800 border border-slate-700/70 text-indigo-300 hover:text-indigo-200 text-xs font-semibold py-2 px-3 rounded-xl transition-all"
-          >
-            <UserCheck className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Direct Admin Preview Access (1-Click)</span>
-          </button>
-          <p className="text-[11px] text-slate-500 text-center mt-2">
-            Instant Super Admin preview access for testing live dashboard components.
-          </p>
-        </div>
-
         {/* Return to Consumer Portal Link */}
-        <div className="mt-4 text-center">
+        <div className="mt-6 pt-5 border-t border-slate-800/80 text-center">
           <Link to="/" className="text-xs text-slate-400 hover:text-indigo-300 transition-colors">
             ← Return to Consumer Pharmacy Store
           </Link>

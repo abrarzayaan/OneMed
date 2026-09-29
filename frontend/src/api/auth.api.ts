@@ -21,4 +21,6 @@ export const authApi = {
     api.post<{ message: string }>('/auth/register/', data),
   refresh: (refresh: string) =>
     api.post<{ access: string }>('/auth/token/', { refresh }),
+  me: () =>
+    api.get<any>('/auth/me/'),
 };

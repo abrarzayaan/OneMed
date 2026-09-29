@@ -30,15 +30,24 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const isAuthRequest = error.config?.url?.includes('/auth/');
-    const isPortalRoute = typeof window !== 'undefined' && (
-      window.location.pathname.startsWith('/admin') ||
-      window.location.pathname.startsWith('/vendor') ||
-      window.location.pathname.startsWith('/rider')
-    );
-    if (error.response?.status === 401 && !isAuthRequest && !isPortalRoute) {
+    const isLoginEndpoint =
+      error.config?.url?.includes('/auth/login/') ||
+      error.config?.url?.includes('/auth/token/');
+
+    if (error.response?.status === 401 && !isLoginEndpoint) {
       useAuthStore.getState().logout();
-      window.location.href = '/login';
+      if (typeof window !== 'undefined') {
+        const path = window.location.pathname;
+        if (path.startsWith('/admin') && !path.startsWith('/admin/login')) {
+          window.location.href = '/admin/login';
+        } else if (path.startsWith('/vendor') && !path.startsWith('/vendor/login')) {
+          window.location.href = '/vendor/login';
+        } else if (path.startsWith('/rider') && !path.startsWith('/rider/login')) {
+          window.location.href = '/rider/login';
+        } else if (!path.startsWith('/login') && !path.startsWith('/admin/login') && !path.startsWith('/vendor/login') && !path.startsWith('/rider/login')) {
+          window.location.href = '/login';
+        }
+      }
     }
     return Promise.reject(error);
   }
