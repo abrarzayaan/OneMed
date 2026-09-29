@@ -15,11 +15,13 @@ import {
   Flame,
   X,
   Sparkles,
+  MessageCircle,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import { useCartStore } from '@/store/cart.store';
 import { useWishlistStore } from '@/store/wishlist.store';
 import { useCategoryModalStore } from '@/store/categoryModal.store';
+import { useWhatsAppSupport } from '@/hooks/useWhatsAppSupport';
 import { useQuery } from '@tanstack/react-query';
 import { productsApi } from '@/api/products.api';
 import { adminCmsApi } from '@/portals/admin/api/adminCms.api';
@@ -38,6 +40,7 @@ export default function Header() {
   const openDrawer = useCartStore((s) => s.openDrawer);
   const wishlistCount = useWishlistStore((s) => s.items.length);
   const openCategoryModal = useCategoryModalStore((s) => s.openModal);
+  const { number: whatsappNumber, isEnabled: isWhatsAppEnabled, link: whatsappLink } = useWhatsAppSupport();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCat, setSelectedCat] = useState('');
@@ -191,15 +194,28 @@ export default function Header() {
 
         {/* Right Section Icons */}
         <div className="flex items-center gap-1.5 sm:gap-4 shrink-0">
-          <div className="hidden xl:flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-accent-500/10 text-accent-400 flex items-center justify-center">
-              <Phone className="w-4 h-4" />
-            </div>
-            <div className="text-left leading-tight">
-              <span className="text-[9px] text-content-muted uppercase font-semibold">Need Help?</span>
-              <p className="text-xs font-extrabold text-content-primary">+880 1334-317864</p>
-            </div>
-          </div>
+          {isWhatsAppEnabled && (
+            <a
+              href={whatsappLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden xl:flex items-center gap-2.5 px-2 py-1 rounded-xl hover:bg-bg-hover transition-colors group cursor-pointer"
+              title="Chat with Pharmacist on WhatsApp"
+            >
+              <div className="w-8 h-8 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center justify-center group-hover:scale-105 transition-transform">
+                <MessageCircle className="w-4 h-4 fill-emerald-500/20" />
+              </div>
+              <div className="text-left leading-tight">
+                <span className="text-[9px] text-content-muted uppercase font-semibold flex items-center gap-1">
+                  WhatsApp Help
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
+                </span>
+                <p className="text-xs font-extrabold text-content-primary group-hover:text-emerald-400 transition-colors">
+                  {whatsappNumber}
+                </p>
+              </div>
+            </a>
+          )}
 
           <Link
             to="/wishlist"
@@ -592,6 +608,22 @@ export default function Header() {
                 ⚡ FLASH
               </span>
             </Link>
+
+            {isWhatsAppEnabled && (
+              <a
+                href={whatsappLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="mt-2 flex items-center justify-between p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold transition-all hover:bg-emerald-500/20"
+              >
+                <div className="flex items-center gap-2">
+                  <MessageCircle className="w-4 h-4 fill-emerald-500/20" />
+                  <span>WhatsApp Live Support</span>
+                </div>
+                <span className="text-[11px] font-mono">{whatsappNumber}</span>
+              </a>
+            )}
           </nav>
         </div>
       )}

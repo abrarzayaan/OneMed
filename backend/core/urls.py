@@ -9,6 +9,7 @@ from django.conf.urls.static import static
 # pyrefly: ignore [missing-import]
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from core.views import health_check
+from apps.authentication.views import WhatsAppSettingView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -16,6 +17,7 @@ urlpatterns = [
     
     # Apps URLs
     path('api/auth/', include('apps.authentication.urls')),
+    path('api/settings/whatsapp/', WhatsAppSettingView.as_view(), name='settings_whatsapp'),
     path('api/profiles/', include('apps.profiles.urls')),
     path('api/vendor/', include('apps.profiles.urls')), # Direct vendor alias path
     path('api/admin-vendors/', include('apps.profiles.urls')), # Direct admin vendor alias path

@@ -9,7 +9,7 @@ from django.db.models import Q
 # pyrefly: ignore [missing-import]
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from .models import Role, UserRole, Users
+from .models import Role, UserRole, Users, SystemSetting
 from apps.profiles.models import ConsumerProfile, VendorProfile, RiderProfile
 
 User = get_user_model()
@@ -103,3 +103,26 @@ class CustomTokenSerializer(TokenObtainPairSerializer):
         token["role"] = role
         token["phone"] = getattr(user, 'phone_number', '') or user.username
         return token
+
+
+class WhatsAppSettingSerializer(serializers.ModelSerializer):
+    whatsapp_link = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SystemSetting
+        fields = [
+            'id',
+            'whatsapp_support_number',
+            'whatsapp_default_message',
+            'is_whatsapp_enabled',
+            'whatsapp_link',
+            'updated_at',
+        ]
+        read_only_fields = ['id', 'updated_at', 'whatsapp_link']
+
+    def get_whatsapp_link(self, obj):
+        import re
+        import urllib.parse
+        cleaned = re.sub(r'[^0-9]', '', obj.whatsapp_support_number or '')
+        msg = urllib.parse.quote(obj.whatsapp_default_message or '')
+        return f"https://wa.me/{cleaned}?text={msg}" if cleaned else ""

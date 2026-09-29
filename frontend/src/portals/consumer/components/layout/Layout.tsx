@@ -9,6 +9,7 @@ import CategoryModal from '@/portals/consumer/components/product/CategoryModal';
 import PWAInstallPrompt from '@/components/ui/PWAInstallPrompt';
 import { OfflineBanner } from '@/components/ui/OfflineBanner';
 import { usePortalPWA } from '@/hooks/usePortalPWA';
+import FloatingWhatsApp from './FloatingWhatsApp';
 
 import { useThemeStore } from '@/store/theme.store';
 import { useCart } from '@/hooks/useCart';
@@ -60,6 +61,9 @@ export default function Layout() {
 
       {/* PWA Install Prompt Banner for Mobile Chrome & Desktop */}
       <PWAInstallPrompt />
+
+      {/* Dynamic WhatsApp Live Support Floating Contact */}
+      <FloatingWhatsApp />
 
       {/* Offline Banner for Connectivity Detection */}
       <OfflineBanner portalName="OneMed Pharmacy" />

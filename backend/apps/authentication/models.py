@@ -129,3 +129,34 @@ class SecurityAuditLog(models.Model):
 
     def __str__(self):
         return f"{self.actor_name} - {self.action_type} - {self.timestamp}"
+
+
+class SystemSetting(models.Model):
+    whatsapp_support_number = models.CharField(
+        max_length=50,
+        default='+880 1334-317864',
+        help_text="Active WhatsApp customer support number with country code"
+    )
+    whatsapp_default_message = models.CharField(
+        max_length=255,
+        default='Hello OneMed Support, I need assistance with an order.',
+        help_text="Pre-filled default message when user clicks WhatsApp link"
+    )
+    is_whatsapp_enabled = models.BooleanField(
+        default=True,
+        help_text="Toggle WhatsApp support button visibility across consumer portal"
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'system_settings'
+        verbose_name = 'System Setting'
+        verbose_name_plural = 'System Settings'
+
+    @classmethod
+    def get_settings(cls):
+        obj, _ = cls.objects.get_or_create(id=1)
+        return obj
+
+    def __str__(self):
+        return f"System Settings (WhatsApp: {self.whatsapp_support_number})"

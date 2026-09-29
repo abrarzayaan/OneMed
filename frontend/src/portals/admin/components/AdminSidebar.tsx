@@ -20,6 +20,7 @@ import {
   ShieldAlert,
   Sliders,
   PlusCircle,
+  MessageSquare,
 } from 'lucide-react';
 import type { NavGroup } from '../types/admin.types';
 
@@ -69,6 +70,7 @@ export const ADMIN_NAV_GROUPS: NavGroup[] = [
     groupTitle: 'System & Security',
     items: [
       { id: 'rbac', label: 'Staff Roles & RBAC', path: '/admin/rbac', iconName: 'ShieldCheck' },
+      { id: 'settings', label: 'WhatsApp & System Config', path: '/admin/settings', iconName: 'MessageSquare', badge: 'SUPER', badgeColor: 'rose' },
       { id: 'explorer', label: 'Generic Model Explorer', path: '/admin/explorer', iconName: 'Database' },
       { id: 'audit-logs', label: 'Audit & Security Logs', path: '/admin/audit-logs', iconName: 'History' },
     ],
@@ -92,6 +94,7 @@ const renderIcon = (iconName: string) => {
     case 'Database': return <Database {...props} />;
     case 'History': return <History {...props} />;
     case 'PlusCircle': return <PlusCircle {...props} />;
+    case 'MessageSquare': return <MessageSquare {...props} />;
     default: return <Sliders {...props} />;
   }
 };
@@ -111,6 +114,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   // Filter Nav Groups based on dynamic permissions
   const filteredNavGroups = ADMIN_NAV_GROUPS.map((group) => {
     const visibleItems = group.items.filter((item) => {
+      if (item.id === 'settings') return isSuperAdmin;
       if (isSuperAdmin) return true;
       if (item.id === 'dashboard') return true;
       return Boolean(userPerms[item.id]);

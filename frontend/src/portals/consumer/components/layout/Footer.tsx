@@ -1,7 +1,10 @@
 import { Link } from 'react-router-dom';
-import { Truck, RotateCcw, ShieldCheck, Phone, Mail, MapPin, CreditCard } from 'lucide-react';
+import { Truck, RotateCcw, ShieldCheck, Phone, Mail, MapPin, CreditCard, MessageCircle } from 'lucide-react';
+import { useWhatsAppSupport } from '@/hooks/useWhatsAppSupport';
 
 export default function Footer() {
+  const { number: whatsappNumber, link: whatsappLink, isEnabled: isWhatsAppEnabled } = useWhatsAppSupport();
+
   return (
     <footer className="bg-bg-card border-t border-bg-border pt-12 pb-6 text-xs text-content-secondary">
       <div className="max-w-7xl mx-auto px-4 space-y-12">
@@ -9,9 +12,22 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
           {/* Col 1: Help & Contact Info */}
           <div className="md:col-span-2 space-y-4">
-            <h3 className="font-head font-extrabold text-xl text-primary-400">
-              +880 1334-317864
-            </h3>
+            {isWhatsAppEnabled ? (
+              <a
+                href={whatsappLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 group font-head font-extrabold text-xl text-primary-400 hover:text-emerald-400 transition-colors"
+                title="Chat on WhatsApp"
+              >
+                <MessageCircle className="w-5 h-5 text-emerald-400 fill-emerald-500/20" />
+                <span>{whatsappNumber}</span>
+              </a>
+            ) : (
+              <h3 className="font-head font-extrabold text-xl text-primary-400">
+                {whatsappNumber}
+              </h3>
+            )}
             <div className="space-y-2 text-content-muted">
               <p className="flex items-center gap-2">
                 <Phone className="w-3.5 h-3.5 text-primary-400" /> Monday - Friday : 9:00 to 5:00

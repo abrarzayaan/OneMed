@@ -11,12 +11,17 @@ from django.db.models import Q
 # pyrefly: ignore [missing-import]
 from rest_framework_simplejwt.views import TokenObtainPairView
 # pyrefly: ignore [missing-import]
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from drf_spectacular.utils import extend_schema
-# pyrefly: ignore [missing-import]
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import RegisterSerializer, LoginSerializer, CustomTokenSerializer
-from .models import Users, UserRole
+from .serializers import (
+    RegisterSerializer,
+    LoginSerializer,
+    CustomTokenSerializer,
+    WhatsAppSettingSerializer,
+)
+from .models import Users, UserRole, SystemSetting, SecurityAuditLog
 
 User = get_user_model()
 
@@ -119,3 +124,58 @@ class MeView(APIView):
 
 class CustomTokenView(TokenObtainPairView):
     serializer_class = CustomTokenSerializer
+
+
+class WhatsAppSettingView(APIView):
+    """
+    Public GET endpoint to fetch dynamic WhatsApp support details.
+    Restricted PUT/PATCH endpoint requiring Super Admin privileges.
+    """
+    def get_permissions(self):
+        if self.request.method in ['PUT', 'PATCH']:
+            return [IsAuthenticated()]
+        return [AllowAny()]
+
+    @extend_schema(responses={200: WhatsAppSettingSerializer})
+    def get(self, request):
+        setting = SystemSetting.get_settings()
+        serializer = WhatsAppSettingSerializer(setting)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @extend_schema(request=WhatsAppSettingSerializer, responses={200: WhatsAppSettingSerializer})
+    def put(self, request):
+        return self._update_settings(request, partial=False)
+
+    @extend_schema(request=WhatsAppSettingSerializer, responses={200: WhatsAppSettingSerializer})
+    def patch(self, request):
+        return self._update_settings(request, partial=True)
+
+    def _update_settings(self, request, partial=False):
+        user = request.user
+        is_super = bool(
+            user.is_superuser or (hasattr(user, 'get_role_name') and user.get_role_name() == 'SUPERADMIN')
+        )
+        if not is_super:
+            return Response(
+                {"error": "Forbidden: Super Admin access required to update system settings."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        setting = SystemSetting.get_settings()
+        serializer = WhatsAppSettingSerializer(setting, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        # Log security audit trail
+        try:
+            SecurityAuditLog.objects.create(
+                actor_name=getattr(user, 'username', 'SuperAdmin'),
+                action_type="UPDATE",
+                module="SYSTEM_SETTINGS",
+                description=f"Updated WhatsApp support number to: {setting.whatsapp_support_number} (Enabled: {setting.is_whatsapp_enabled})",
+                ip_address=request.META.get('REMOTE_ADDR')
+            )
+        except Exception:
+            pass
+
+        return Response(serializer.data, status=status.HTTP_200_OK)

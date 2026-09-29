@@ -28,16 +28,17 @@ This task list tracks all remaining features and optimizations required before r
 ---
 
 ## 💬 Task 3: Dynamic WhatsApp Support Contact Feature
-- [ ] **Backend (Django)**:
+- [x] **Backend (Django)**:
   - Create/Update System Settings model to store `whatsapp_support_number`.
   - Public API endpoint `GET /api/settings/whatsapp/` (returns active support number for consumers).
   - Restricted API endpoint `PUT/PATCH /api/settings/whatsapp/` (Super Admin permission required).
-- [ ] **Frontend - Consumer Portal**:
+- [x] **Frontend - Consumer Portal**:
   - Add a floating/header WhatsApp support button (`https://wa.me/<number>?text=...`).
   - Fetch dynamic support number from backend API.
-- [ ] **Frontend - Admin Portal**:
+- [x] **Frontend - Admin Portal**:
   - Add WhatsApp Support Number configuration field in Admin Panel.
   - Restrict visibility & edit access strictly to **Super Admin** users.
+
 
 ---
 

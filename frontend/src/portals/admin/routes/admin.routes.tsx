@@ -16,6 +16,7 @@ import { RiderVerificationPage } from '../pages/RiderVerificationPage';
 import { LogisticsFleetPage } from '../pages/LogisticsFleetPage';
 import { AdminSectionPlaceholder } from '../pages/AdminSectionPlaceholder';
 import { AdminLoginPage } from '../pages/AdminLoginPage';
+import { SystemSettingsPage } from '../pages/SystemSettingsPage';
 import {
   FileCheck2,
   Percent,
@@ -117,6 +118,10 @@ export const adminRoutes: RouteObject[] = [
                 icon={History}
               />
             ),
+          },
+          {
+            path: 'settings',
+            element: <SystemSettingsPage />,
           },
         ],
       },
