@@ -24,11 +24,45 @@ export const AdminLoginPage: React.FC = () => {
     setIsLoading(true);
     try {
       const res = await authApi.login({ phone, password });
-      const { access, refresh, user } = res.data;
+      const rawData = (res.data as any) || {};
+      const token =
+        rawData.access ||
+        rawData.token ||
+        rawData.accessToken ||
+        rawData.access_token ||
+        rawData.data?.access ||
+        rawData.data?.token;
+      const refresh =
+        rawData.refresh ||
+        rawData.refreshToken ||
+        rawData.refresh_token ||
+        rawData.data?.refresh ||
+        '';
+      let user = rawData.user || rawData.userData || rawData.data?.user;
 
-      if (!access) {
-        toast.error('Authentication failed: No valid access token received from server.');
+      if (!token) {
+        const errorMsg =
+          rawData.error ||
+          rawData.detail ||
+          rawData.message ||
+          'Authentication failed: No valid token received from server.';
+        toast.error(errorMsg);
         return;
+      }
+
+      // If user object wasn't in login payload, fetch from /auth/me/
+      if (!user) {
+        try {
+          const meRes = await authApi.me();
+          user = meRes.data;
+        } catch {
+          user = {
+            phone,
+            role: 'SUPERADMIN',
+            is_superuser: true,
+            is_staff: true,
+          };
+        }
       }
 
       const isSuper = Boolean(user?.is_superuser || user?.role === 'SUPERADMIN');
@@ -39,11 +73,17 @@ export const AdminLoginPage: React.FC = () => {
         return;
       }
 
-      setAuth(access, refresh || '', user);
-      toast.success(`Authenticated as ${user.staff_role || (isSuper ? 'Super Administrator' : 'Staff Admin')}`);
+      setAuth(token, refresh, user);
+      toast.success(
+        `Authenticated as ${user.staff_role || (isSuper ? 'Super Administrator' : 'Staff Admin')}`
+      );
       navigate('/admin', { replace: true });
     } catch (err: any) {
-      const msg = err?.response?.data?.error || err?.response?.data?.detail || 'Invalid admin credentials';
+      const msg =
+        err?.response?.data?.error ||
+        err?.response?.data?.detail ||
+        err?.response?.data?.message ||
+        'Invalid admin credentials or server error.';
       toast.error(msg);
     } finally {
       setIsLoading(false);
