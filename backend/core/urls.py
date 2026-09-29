@@ -21,11 +21,18 @@ urlpatterns = [
     path('api/profiles/', include('apps.profiles.urls')),
     path('api/vendor/', include('apps.profiles.urls')), # Direct vendor alias path
     path('api/admin-vendors/', include('apps.profiles.urls')), # Direct admin vendor alias path
+    path('api/rider/', include('apps.profiles.urls')), # Direct rider alias path
+    path('api/admin-riders/', include('apps.profiles.urls')), # Direct admin rider alias path
     path('api/products/', include('apps.products.urls')),
     path('api/cart/', include('apps.cart.urls')),
     path("api/coupons/", include("apps.coupons.urls")),
     path("api/checkout/", include("apps.checkout.urls")),
     path("api/", include("apps.orders.urls")),
+
+    # Direct URL alias fallbacks for external or non-prefixed client requests
+    path('profiles/', include('apps.profiles.urls')),
+    path('admin-vendors/', include('apps.profiles.urls')),
+    path('admin-riders/', include('apps.profiles.urls')),
     
     # Swagger API Documentation
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

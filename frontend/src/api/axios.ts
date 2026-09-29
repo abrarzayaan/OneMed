@@ -2,10 +2,10 @@ import axios from 'axios';
 import { useAuthStore } from '@/store/auth.store';
 
 const getApiBaseUrl = () => {
-  if (import.meta.env.VITE_API_BASE_URL) {
-    return import.meta.env.VITE_API_BASE_URL;
-  }
-  return '/api';
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
+  if (!envUrl) return '/api/';
+  const trimmed = envUrl.trim().replace(/\/+$/, '');
+  return trimmed.endsWith('/api') ? `${trimmed}/` : `${trimmed}/api/`;
 };
 
 const api = axios.create({
@@ -13,10 +13,11 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// ── Request interceptor: attach JWT & normalize duplicate /api prefix ──
+// ── Request interceptor: attach JWT & normalize relative URL path ──
 api.interceptors.request.use((config) => {
-  if (config.url && config.url.startsWith('/api/')) {
-    config.url = config.url.replace(/^\/api\//, '/');
+  if (config.url) {
+    // Strip leading /api/ or / so the relative path appends cleanly to baseURL
+    config.url = config.url.replace(/^\/?(api\/)?/, '');
   }
   const token = useAuthStore.getState().token;
   if (token) {

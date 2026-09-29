@@ -45,3 +45,7 @@ This task list tracks all remaining features and optimizations required before r
 ## 🚀 Task 4: Final Pre-Live Production Audit
 - [ ] Environment variables & security check (`.env`).
 - [ ] Final production build test (`npm run build` & Django deployment check).
+
+
+# for cloudflared 
+npx cloudflared tunnel --url http://192.168.0.100:5173/

@@ -147,11 +147,20 @@ class AdminRiderListView(APIView):
 
         data = []
         for r in queryset:
+            rider_name = f"Rider #{r.id}"
+            phone_num = ""
+            email_addr = ""
+            if r.user:
+                full_name = f"{r.user.first_name or ''} {r.user.last_name or ''}".strip()
+                rider_name = full_name or r.user.username or rider_name
+                phone_num = r.user.phone_number or ""
+                email_addr = r.user.email or ""
+
             data.append({
                 "id": r.id,
-                "rider_name": f"{r.user.first_name} {r.user.last_name}".strip() or r.user.username if r.user else f"Rider #{r.id}",
-                "phone_number": r.user.phone_number if r.user else "",
-                "email": r.user.email if r.user else "",
+                "rider_name": rider_name,
+                "phone_number": phone_num,
+                "email": email_addr,
                 "vehicle_type": r.vehicle_type,
                 "vehicle_number": r.vehicle_number or "",
                 "nid_no": r.nid_no or "",
