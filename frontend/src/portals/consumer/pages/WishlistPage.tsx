@@ -20,6 +20,7 @@ import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Skeleton from '@/components/ui/Skeleton';
 import toast from 'react-hot-toast';
+import { getMediaUrl } from '@/utils/mediaUrl';
 
 export default function WishlistPage() {
   const navigate = useNavigate();
@@ -184,11 +185,7 @@ export default function WishlistPage() {
                     <div className="relative aspect-square w-full rounded-xl bg-bg-surface overflow-hidden flex items-center justify-center mb-3">
                       {imageUrl ? (
                         <img
-                          src={
-                            imageUrl.startsWith('http')
-                              ? imageUrl
-                              : `http://localhost:8000${imageUrl}`
-                          }
+                          src={getMediaUrl(imageUrl)}
                           alt={productName}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />

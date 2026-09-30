@@ -15,7 +15,7 @@ const api = axios.create({
 
 // ── Request interceptor: attach JWT & normalize relative URL path ──
 api.interceptors.request.use((config) => {
-  if (config.url) {
+  if (config.url && !config.url.startsWith('http://') && !config.url.startsWith('https://')) {
     // Strip leading /api/ or / so the relative path appends cleanly to baseURL
     config.url = config.url.replace(/^\/?(api\/)?/, '');
   }

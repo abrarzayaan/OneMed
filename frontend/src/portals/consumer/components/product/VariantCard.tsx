@@ -8,6 +8,7 @@ import { useCart } from '@/hooks/useCart';
 import { formatCurrency, formatDiscount } from '@/utils/formatCurrency';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
+import { getMediaUrl } from '@/utils/mediaUrl';
 
 interface VariantCardProps {
   variant: ProductVariantItem;
@@ -61,7 +62,7 @@ export default function VariantCard({ variant, showTimer = false }: VariantCardP
         <div className="relative aspect-square w-full rounded-xl bg-bg-surface overflow-hidden flex items-center justify-center">
           {variant.thumbnail ? (
             <img
-              src={variant.thumbnail.startsWith('http') ? variant.thumbnail : `http://localhost:8000${variant.thumbnail}`}
+              src={getMediaUrl(variant.thumbnail)}
               alt={variant.product_name}
               className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
               loading="lazy"

@@ -204,6 +204,7 @@ STORAGES = {
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^http://localhost:\d+$",
     r"^http://127\.0\.0\.1:\d+$",
+    r"^https://.*\.onrender\.com$",
 ]
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
@@ -214,11 +215,14 @@ CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:5175',
     'http://localhost:3000',
     'http://127.0.0.1:3000',
+    'https://onemed-frontend.onrender.com',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'https://*.trycloudflare.com',
     'https://*.onrender.com',
+    'https://onemed-frontend.onrender.com',
+    'https://onemed-backend-5xp9.onrender.com',
     'https://*.vercel.app',
 ]
 

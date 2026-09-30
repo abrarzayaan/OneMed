@@ -35,6 +35,7 @@ import VariantCard from '@/portals/consumer/components/product/VariantCard';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Skeleton from '@/components/ui/Skeleton';
+import { getMediaUrl } from '@/utils/mediaUrl';
 
 export default function VariantDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -123,8 +124,7 @@ export default function VariantDetailPage() {
     galleryImages[selectedImageIndex] || variant.thumbnail || '';
 
   const getFullImageUrl = (url: string) => {
-    if (!url) return '';
-    return url.startsWith('http') ? url : `http://localhost:8000${url}`;
+    return getMediaUrl(url);
   };
 
   // Pricing calculations

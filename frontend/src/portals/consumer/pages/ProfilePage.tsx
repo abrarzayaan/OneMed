@@ -17,6 +17,7 @@ import { useAuthStore } from '@/store/auth.store';
 import AccountSidebar from '@/portals/consumer/components/account/AccountSidebar';
 import Button from '@/components/ui/Button';
 import Skeleton from '@/components/ui/Skeleton';
+import { getMediaUrl } from '@/utils/mediaUrl';
 
 export default function ProfilePage() {
   const queryClient = useQueryClient();
@@ -54,10 +55,7 @@ export default function ProfilePage() {
       if (profile.date_of_birth) setDateOfBirth(profile.date_of_birth);
 
       if (profile.profile_image) {
-        const fullUrl = profile.profile_image.startsWith('http')
-          ? profile.profile_image
-          : `http://localhost:8000${profile.profile_image}`;
-        setImagePreview(fullUrl);
+        setImagePreview(getMediaUrl(profile.profile_image));
       }
     }
   }, [profile, user]);
