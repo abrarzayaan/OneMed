@@ -77,6 +77,53 @@ export const VariantManager: React.FC = () => {
   // Dynamic meta key-value pairs
   const [metaPairs, setMetaPairs] = useState<KeyValuePair[]>([]);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isSkuCustomized, setIsSkuCustomized] = useState<boolean>(false);
+
+  const generateSku = (prodId: number | '', name: string): string => {
+    const selectedProduct = products.find((p) => p.id === Number(prodId));
+    const prodName = selectedProduct ? selectedProduct.name : '';
+
+    const cleanPart = (str: string) =>
+      str
+        .trim()
+        .toUpperCase()
+        .replace(/[^A-Z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+
+    const pCode = cleanPart(prodName);
+    const vCode = cleanPart(name);
+
+    if (pCode && vCode) return `${pCode}-${vCode}`;
+    if (pCode) return pCode;
+    if (vCode) return vCode;
+    return '';
+  };
+
+  const handleProductChange = (newProdId: number) => {
+    setProductId(newProdId);
+    if (!editingVariant && !isSkuCustomized) {
+      setSku(generateSku(newProdId, variantName));
+    }
+  };
+
+  const handleVariantNameChange = (name: string) => {
+    setVariantName(name);
+    if (!editingVariant && !isSkuCustomized) {
+      setSku(generateSku(productId, name));
+    }
+  };
+
+  const handleSkuChange = (val: string) => {
+    setSku(val.toUpperCase());
+    setIsSkuCustomized(true);
+  };
+
+  const handleRegenerateSku = () => {
+    const autoSku = generateSku(productId, variantName);
+    setSku(autoSku);
+    setIsSkuCustomized(false);
+    toast.success('SKU auto-generated!');
+  };
 
   const fetchInitialData = async () => {
     setIsLoading(true);
@@ -101,6 +148,7 @@ export const VariantManager: React.FC = () => {
 
   const openCreateModal = () => {
     setEditingVariant(null);
+    setIsSkuCustomized(false);
     if (products.length > 0) setProductId(products[0].id);
     setVariantName('');
     setSku('');
@@ -136,6 +184,7 @@ export const VariantManager: React.FC = () => {
 
   const openEditModal = (item: AdminVariantItem) => {
     setEditingVariant(item);
+    setIsSkuCustomized(true);
     setProductId(item.product_id || (products.length > 0 ? products[0].id : ''));
     setVariantName(item.variant_name);
     setSku(item.sku);
@@ -567,7 +616,7 @@ export const VariantManager: React.FC = () => {
                   <select
                     required
                     value={productId}
-                    onChange={(e) => setProductId(Number(e.target.value))}
+                    onChange={(e) => handleProductChange(Number(e.target.value))}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-bg-surface border border-bg-border text-content-primary text-xs font-medium outline-none focus:border-emerald-500"
                   >
                     {products.map((p) => (
@@ -586,22 +635,33 @@ export const VariantManager: React.FC = () => {
                     type="text"
                     required
                     value={variantName}
-                    onChange={(e) => setVariantName(e.target.value)}
+                    onChange={(e) => handleVariantNameChange(e.target.value)}
                     placeholder="e.g. 10 Pcs Strip"
                     className="w-full px-3.5 py-2.5 rounded-xl bg-bg-surface border border-bg-border text-content-primary text-xs font-medium outline-none focus:border-emerald-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono font-bold text-content-muted mb-1.5">
-                    SKU Code *
-                  </label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-mono font-bold text-content-muted">
+                      SKU Code *
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handleRegenerateSku}
+                      title="Auto-generate SKU from Product and Variant Name"
+                      className="text-[10px] font-mono font-bold text-primary-400 hover:text-primary-300 flex items-center space-x-1 px-1.5 py-0.5 rounded bg-primary-500/10 border border-primary-500/20 hover:bg-primary-500/20 transition-colors"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      <span>Auto-Gen</span>
+                    </button>
+                  </div>
                   <input
                     type="text"
                     required
                     value={sku}
-                    onChange={(e) => setSku(e.target.value.toUpperCase())}
-                    placeholder="e.g. NAPA-500-STRIP"
+                    onChange={(e) => handleSkuChange(e.target.value)}
+                    placeholder="e.g. NAPA-EXTRA-10-PCS-STRIP"
                     className="w-full px-3.5 py-2.5 rounded-xl bg-bg-surface border border-bg-border text-primary-400 font-mono font-bold text-xs outline-none focus:border-emerald-500"
                   />
                 </div>
