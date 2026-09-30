@@ -19,7 +19,16 @@ api.interceptors.request.use((config) => {
     // Strip leading /api/ or / so the relative path appends cleanly to baseURL
     config.url = config.url.replace(/^\/?(api\/)?/, '');
   }
-  const token = useAuthStore.getState().token;
+  let token = useAuthStore.getState().token;
+  if (!token && typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem('onemed-auth');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        token = parsed?.state?.token || null;
+      }
+    } catch {}
+  }
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

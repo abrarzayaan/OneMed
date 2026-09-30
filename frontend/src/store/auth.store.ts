@@ -26,13 +26,27 @@ interface AuthState {
   logout:     () => void;
 }
 
+const getStoredAuth = () => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem('onemed-auth');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed?.state || null;
+  } catch {
+    return null;
+  }
+};
+
+const initialAuth = getStoredAuth();
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
-      token:      null,
-      refresh:    null,
-      user:       null,
-      isLoggedIn: false,
+      token:      initialAuth?.token || null,
+      refresh:    initialAuth?.refresh || null,
+      user:       initialAuth?.user || null,
+      isLoggedIn: initialAuth?.isLoggedIn ?? Boolean(initialAuth?.token),
 
       setAuth: (token, refresh, user) =>
         set({ token, refresh, user, isLoggedIn: true }),

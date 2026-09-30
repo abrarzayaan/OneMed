@@ -16,29 +16,19 @@ const AdminAccessDeniedRedirect: React.FC = () => {
 export const AdminGuard: React.FC = () => {
   const { isLoggedIn, user, token, updateUser, logout } = useAuthStore();
   const location = useLocation();
-  const [isValidating, setIsValidating] = useState(true);
-  const [isValidToken, setIsValidToken] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
 
     const verifyAdminSession = async () => {
-      // 1. If not logged in or no token, reject immediately
+      // 1. If not logged in or no token, nothing to verify
       if (!isLoggedIn || !token) {
-        if (isMounted) {
-          setIsValidToken(false);
-          setIsValidating(false);
-        }
         return;
       }
 
       // 2. Reject obvious fake/dummy preview tokens immediately
       if (token.startsWith('preview-') || token.startsWith('demo-')) {
         logout();
-        if (isMounted) {
-          setIsValidToken(false);
-          setIsValidating(false);
-        }
         return;
       }
 
@@ -46,19 +36,13 @@ export const AdminGuard: React.FC = () => {
       try {
         const res = await authApi.me();
         const serverUser = res.data;
-        if (isMounted) {
+        if (isMounted && serverUser) {
           updateUser(serverUser);
-          setIsValidToken(true);
-          setIsValidating(false);
         }
       } catch (err: any) {
         // If 401 Unauthorized or invalid token, clean stale state & redirect to login
         if (err?.response?.status === 401 || err?.response?.status === 403) {
           logout();
-        }
-        if (isMounted) {
-          setIsValidToken(false);
-          setIsValidating(false);
         }
       }
     };
@@ -68,21 +52,10 @@ export const AdminGuard: React.FC = () => {
     return () => {
       isMounted = false;
     };
-  }, [token, isLoggedIn, logout, updateUser]);
-
-  if (isValidating) {
-    return (
-      <div className="min-h-screen bg-bg-base flex flex-col items-center justify-center p-4">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-primary-500/30 border-t-primary-500 rounded-full animate-spin" />
-          <p className="text-xs font-mono text-content-muted">Verifying enterprise security credentials...</p>
-        </div>
-      </div>
-    );
-  }
+  }, []);
 
   // Not authenticated or token invalid
-  if (!isLoggedIn || !isValidToken || !user) {
+  if (!isLoggedIn || !token || !user) {
     return <Navigate to="/admin/login" replace state={{ from: location }} />;
   }
 
